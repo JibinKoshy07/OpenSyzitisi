@@ -18,8 +18,13 @@ export class AdminService {
   ) {}
 
   async initializeAdmin(): Promise<void> {
-    const adminEmail = this.configService.get('admin.email');
-    const adminPassword = this.configService.get('admin.password');
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@opensyzitisi.local';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+
+    if (!adminPassword) {
+      console.log('Admin password not configured, skipping admin creation');
+      return;
+    }
 
     const existingAdmin = await this.userModel.findOne({ email: adminEmail });
 
@@ -32,8 +37,10 @@ export class AdminService {
         displayName: 'Admin',
         role: UserRole.ADMIN,
         isActive: true,
+        status: 'online',
       });
       await admin.save();
+      console.log(`Admin user created: ${adminEmail}`);
     }
   }
 
