@@ -1,11 +1,8 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { IoAdapter } from './common/adapters/websocket.adapter';
-import helmet from 'helmet';
-import * as compression from 'compression';
-import { Logger } from '@nestjs/common';
+import { CustomIoAdapter } from './common/adapters/websocket.adapter';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -15,9 +12,6 @@ async function bootstrap() {
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
   });
-
-  app.use(helmet());
-  app.use(compression());
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -29,7 +23,7 @@ async function bootstrap() {
 
   app.enableShutdownHooks();
 
-  app.useWebSocketAdapter(new IoAdapter(app));
+  app.useWebSocketAdapter(new CustomIoAdapter(app));
 
   const config = new DocumentBuilder()
     .setTitle('OpenSyzitisi API')

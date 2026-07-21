@@ -53,6 +53,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.userId = payload.sub;
       client.username = payload.email;
 
+      if (!client.userId) {
+        client.disconnect();
+        return;
+      }
+
       await this.chatService.setUserOnline(client.userId, client.id);
 
       if (!this.userSockets.has(client.userId)) {
@@ -65,7 +70,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.server.emit('userOnline', { userId: client.userId });
 
       this.logger.log(`User ${client.userId} connected with socket ${client.id}`);
-    } catch (error) {
+    } catch (error: any) {
       this.logger.warn(`Connection failed: ${error.message}`);
       client.disconnect();
     }

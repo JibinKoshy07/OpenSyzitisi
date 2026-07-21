@@ -52,6 +52,7 @@ export interface Channel {
   lastMessageAt?: Date;
   avatar?: string;
   memberCount?: number;
+  createdAt: Date;
 }
 
 export interface Message {

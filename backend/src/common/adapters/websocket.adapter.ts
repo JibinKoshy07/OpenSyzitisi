@@ -1,21 +1,8 @@
-import { INestApplicationContext, WebSocketAdapter } from '@nestjs/common';
-import { IoAdapter } from '@nestjs/platform-socket.io';
-import { ServerOptions } from 'socket.io';
+import { IoAdapter as NestIoAdapter } from '@nestjs/platform-socket.io';
+import { INestApplication } from '@nestjs/common';
 
-export class IoAdapter extends WebSocketAdapter {
-  constructor(app: INestApplicationContext) {
+export class CustomIoAdapter extends NestIoAdapter {
+  constructor(app: INestApplication) {
     super(app);
-  }
-
-  createIOServer(port: number, options?: ServerOptions): any {
-    const server = super.createIOServer(port, {
-      ...options,
-      cors: {
-        origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-        credentials: true,
-      },
-      transports: ['websocket', 'polling'],
-    });
-    return server;
   }
 }

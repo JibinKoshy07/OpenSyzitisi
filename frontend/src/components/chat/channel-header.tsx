@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Hash, Users, Settings, Search, Info, UserPlus } from 'lucide-react';
 import { Channel, ChannelType } from '@/types';
 import { useChatStore } from '@/store/chat';
+import { useAuthStore } from '@/store/auth';
 import { usersService } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,10 +32,15 @@ interface ChannelHeaderProps {
 
 export function ChannelHeader({ channel }: ChannelHeaderProps) {
   const { onlineUsers } = useChatStore();
+  const { user } = useAuthStore();
   const [showMembers, setShowMembers] = useState(false);
   const [showAddMembers, setShowAddMembers] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
+
+  const getOtherDMUser = () => {
+    return channel.members?.find((m) => m._id !== user?._id);
+  };
 
   const handleSearchUsers = async () => {
     if (!searchQuery.trim()) return;
@@ -76,14 +82,14 @@ export function ChannelHeader({ channel }: ChannelHeaderProps) {
               name={channel.members?.[0]?.displayName || channel.members?.[0]?.username || 'User'}
               size="sm"
               showStatus
-              status={onlineUsers.includes(channel.members?.[0]?._id) ? 'online' : 'offline'}
+              status={onlineUsers.includes(getOtherDMUser()?._id || '') ? 'online' : 'offline'}
             />
           ) : (
             <Hash className="h-5 w-5 text-muted-foreground" />
           )}
           <h2 className="font-semibold">
             {channel.type === ChannelType.DIRECT
-              ? channel.members?.find((m) => m._id !== useChatStore.getState().channels[0])?.displayName
+              ? getOtherDMUser()?.displayName || getOtherDMUser()?.username
               : channel.name}
           </h2>
           {channel.description && (
