@@ -74,8 +74,10 @@ services:
     networks:
       - opensyzitisi-network
     depends_on:
-      - backend
-      - frontend
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
 
   mongo-express:
     image: mongo-express:latest
