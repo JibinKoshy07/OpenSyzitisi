@@ -3,15 +3,13 @@ import { useAuthStore } from '@/store/auth';
 
 const getApiUrl = () => {
   if (typeof window !== 'undefined') {
-    return window.location.origin;
+    return `${window.location.origin}/api`;
   }
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost';
+  return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost'}/api`;
 };
 
-const API_URL = getApiUrl();
-
 export const api: AxiosInstance = axios.create({
-  baseURL: `${API_URL}/api`,
+  baseURL: '',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -20,6 +18,9 @@ export const api: AxiosInstance = axios.create({
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = useAuthStore.getState().accessToken;
+    if (!config.url?.startsWith('http')) {
+      config.baseURL = getApiUrl();
+    }
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -39,7 +40,7 @@ api.interceptors.response.use(
       try {
         const refreshToken = useAuthStore.getState().refreshToken;
         if (refreshToken) {
-          const response = await axios.post(`${API_URL}/api/auth/refresh`, {
+          const response = await axios.post(`${getApiUrl()}/auth/refresh`, {
             refreshToken,
           });
           const { accessToken } = response.data;
