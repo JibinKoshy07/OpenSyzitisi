@@ -4,7 +4,12 @@ import { useChatStore } from '@/store/chat';
 import { useNotificationStore } from '@/store/notification';
 import { Message } from '@/types';
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const getSocketUrl = () => {
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost';
+};
 
 class SocketService {
   private socket: Socket | null = null;
@@ -14,7 +19,7 @@ class SocketService {
     const { accessToken } = useAuthStore.getState();
     if (!accessToken || this.socket?.connected) return;
 
-    this.socket = io(`${SOCKET_URL}/chat`, {
+    this.socket = io(`${getSocketUrl()}/chat`, {
       auth: { token: accessToken },
       transports: ['websocket', 'polling'],
     });
