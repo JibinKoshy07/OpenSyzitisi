@@ -74,13 +74,15 @@ export class AuthService {
       role: user.role,
     };
 
+    const jwtSecret = process.env.JWT_SECRET || 'default-secret-change-in-production';
+
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret: this.configService.get('jwt.secret'),
+        secret: jwtSecret,
         expiresIn: '1d',
       }),
       this.jwtService.signAsync(payload, {
-        secret: this.configService.get('jwt.secret'),
+        secret: jwtSecret,
         expiresIn: '7d',
       }),
     ]);
